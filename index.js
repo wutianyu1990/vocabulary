@@ -2,6 +2,8 @@ const fs = require('fs')
 
 let trie = {}
 let tempWords = {};
+let stopWords = '';
+let essayLength = 0;
 
 function read(path) {
   return new Promise((resolve,reject)=>{
@@ -17,14 +19,15 @@ function read(path) {
 
 async function getData(){
   try{
-    return await Promise.all([ read('./text.txt') ]);
+    return await Promise.all([ read('./text.txt'), read('./stopwords.txt') ]);
   }catch (e){
     console.log(e);
   }
 }
 
 const start = async function(){
-  let str = await getData();
+  let [ str, stopwords ] = await getData();
+  stopWords = stopwords.split("\n");
   str = str.toString();
   str = str.replace(/[^\u4e00-\u9fa5]/g,'@');
   str = str.replace(/@+/g,' ')
@@ -35,6 +38,7 @@ start();
 
 function split(str){
   str = str.split(' ');
+  essayLength = [ ...str ].length;
   for(let words of [ ...str ]) {
     if([...words].length <= 1){
       continue;
@@ -53,7 +57,6 @@ function split(str){
 
 function wordsToTire(str){
   let words = [ ...str ];
-  let stopWords = ["和","与","你","我","两","这","把","那","个","他","您","它","们","是","的","一","了","在"]
   if(stopWords.includes(words[0])){
     return false;
   }
